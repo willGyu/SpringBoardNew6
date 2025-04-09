@@ -5,6 +5,10 @@
   
 <mapper namespace="com.itwillbs.mapper.BoardMapper">
 
+	<!-- 시간정보 조회 -->
+	<select id="getServerTime" resultType="string">
+		select now()
+	</select>
 
 	
 </mapper>  
