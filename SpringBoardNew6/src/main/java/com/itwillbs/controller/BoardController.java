@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.itwillbs.domain.BoardVO;
 import com.itwillbs.service.BoardService;
 
 @Controller
@@ -45,7 +46,23 @@ public class BoardController {
 	}
 	
 	// 게시판 글쓰기 - POST
+	@RequestMapping(value = "/regist",method = RequestMethod.POST)
+	public String registPOST(BoardVO vo) throws Exception{
+		logger.info(" registPOST() 실행! ");
+		// 인코딩 데이터 처리 => web.xml 처리
+		
+		// 폼태그에서 전달된 파라메터를 저장 & 출력
+		logger.info("vo : {}",vo);
+		
+		// 서비스 호출 - 게시판 글쓰기 동작을 처리(DAO호출)
+		bService.registBoard(vo);
+		
+		// 게시판 글목록 페이지로 이동
+		//return "/board/listAll";(x)
+		return "redirect:/board/listAll";
+	}
 	
+
 	
 	
 	
