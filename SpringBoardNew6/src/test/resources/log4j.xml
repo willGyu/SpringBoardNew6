@@ -17,6 +17,9 @@
 	<logger name="com.itwillbs.persistence">
 		<level value="info" />
 	</logger>
+	<logger name="com.itwillbs.service">
+		<level value="info" />
+	</logger>
 
 
 
