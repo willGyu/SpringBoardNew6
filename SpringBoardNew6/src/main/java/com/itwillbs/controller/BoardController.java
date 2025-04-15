@@ -6,8 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.itwillbs.domain.BoardVO;
 import com.itwillbs.service.BoardService;
@@ -47,7 +50,7 @@ public class BoardController {
 	
 	// 게시판 글쓰기 - POST
 	@RequestMapping(value = "/regist",method = RequestMethod.POST)
-	public String registPOST(BoardVO vo) throws Exception{
+	public String registPOST(BoardVO vo,RedirectAttributes rttr) throws Exception{
 		logger.info(" registPOST() 실행! ");
 		// 인코딩 데이터 처리 => web.xml 처리
 		
@@ -57,12 +60,30 @@ public class BoardController {
 		// 서비스 호출 - 게시판 글쓰기 동작을 처리(DAO호출)
 		bService.registBoard(vo);
 		
+		// 정보를 하나 전달(createOK)
+		rttr.addFlashAttribute("result", "createOK");
+		// => 1회성 데이터 전달
+		
 		// 게시판 글목록 페이지로 이동
 		//return "/board/listAll";(x)
 		return "redirect:/board/listAll";
 	}
 	
-
+	// 게시판 목록 - GET
+	@RequestMapping(value = "/listAll",method = RequestMethod.GET)
+	// @GetMapping(value = "/listAll")
+	public void listAllGET(@ModelAttribute("result") String result) throws Exception{
+		logger.info(" listAllGET() 실행 ");
+		// 전달정보 result 저장
+		logger.info(" result : "+result);
+		
+		// 기존의 DB데이터를 가져와서 화면(view)에 출력
+		
+		
+		
+		// 연결된 뷰페이지로 이동(/board/listAll.jsp)
+		
+	}
 	
 	
 	
