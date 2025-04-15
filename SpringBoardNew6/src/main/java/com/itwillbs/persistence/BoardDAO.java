@@ -1,5 +1,7 @@
 package com.itwillbs.persistence;
 
+import java.util.List;
+
 import com.itwillbs.domain.BoardVO;
 
 /**
@@ -13,8 +15,9 @@ public interface BoardDAO {
 	
 	// 게시판에 글정보를 저장하는 동작(글쓰기)
 	public void insertBoard(BoardVO vo) throws Exception;
-	
-	
+
+	// 게시판 글 전체 목록조회 동작 (글조회)
+	public List<BoardVO> selectBoardListAll() throws Exception;
 	
 	
 	
