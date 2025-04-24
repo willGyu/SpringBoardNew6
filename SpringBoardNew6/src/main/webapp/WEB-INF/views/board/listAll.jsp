@@ -4,6 +4,7 @@
 <%-- <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %> --%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+
 <%@include file="../include/header.jsp" %>
 	<div class="content">
 		<h1>listAll.jsp</h1>
@@ -67,9 +68,36 @@
 		//alert( result );
 		
 		if(result == "createOK"){
-			alert(" 글쓰기 완료! ");
+			//alert(" 글쓰기 완료! ");
+			Swal.fire({
+			  title: "글쓰기 완료!",
+			  text: " 게시판 리스트로 이동합니다! ",
+			  icon: "success"
+			});
 		}
+		
+		if(result == "modifyOK"){
+			//alert(" 글 수정 완료! ");
+			Swal.fire(" 글 수정 완료! ");
+		}
+	</script>
+    
+    <!-- <script src="~~/jQuery-2.1.4.min.js"></script> -->
+	<script type="text/javascript">
+	   // JS사용 
+	   // 사용가능
+	   // Swal.fire("SweetAlert2 is working!");
+	    
+	   // 제이쿼리(jQuery) 사용 선언
+	   $(document).ready(function(){
+		  // 사용가능
+		  // Swal.fire("SweetAlert2 is working!");
+		   
+	   });
+	
 	
 	</script>
+	
+	
 	
 <%@include file="../include/footer.jsp" %>   
