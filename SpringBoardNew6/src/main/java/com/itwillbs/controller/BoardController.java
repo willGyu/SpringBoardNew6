@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -143,9 +142,26 @@ public class BoardController {
 		
 	}
 	
-	
-	
 	// 글정보 수정하기-POST
+	@RequestMapping(value = "/modify",method = RequestMethod.POST)
+	public String modifyPOST(RedirectAttributes rttr,
+			 /*@ModelAttribute*/ BoardVO uvo) throws Exception {
+		logger.info(" modifyPOST() 실행 ");
+		// 한글처리 인코딩(생략- 필터처리)
+		// 전달된 정보(수정할 내용-파라메터)를 저장 => 파라메터 자동수집
+		
+		logger.info(" uvo : "+uvo);
+		
+		// 서비스 - 사용자 게시판 글 수정하는 메서드 호출
+		bService.modifyBoard(uvo);
+		logger.info(" 게시판 수정 성공! ");
+		
+		// 리스트 페이지로 이동 + "수정 완료" alert 출력
+		rttr.addFlashAttribute("result","modifyOK");
+		
+		
+		return "redirect:/board/listAll";
+	}
 	
 	
 	
