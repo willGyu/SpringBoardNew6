@@ -80,6 +80,22 @@
 			//alert(" 글 수정 완료! ");
 			Swal.fire(" 글 수정 완료! ");
 		}
+		
+		if(result == "deleteOK"){
+			Swal.fire({
+				  title: "글삭제 완료!",
+				  text: " 게시판 리스트로 이동합니다! ",
+				  icon: "success"
+			});
+		}
+		
+		if(result == "deleteErr"){
+			Swal.fire({
+				  title: "글삭제 실패!",
+				  text: " 게시판 리스트로 이동합니다! ",
+				  icon: "error"
+			});
+		}
 	</script>
     
     <!-- <script src="~~/jQuery-2.1.4.min.js"></script> -->
