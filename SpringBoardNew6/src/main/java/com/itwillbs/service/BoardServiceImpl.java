@@ -73,6 +73,12 @@ public class BoardServiceImpl implements BoardService{
 		
 		bDao.updateBoard(uvo);		
 	}
+
+	@Override
+	public Integer removeBoard(BoardVO dvo) throws Exception {
+		logger.info(" removeBoard(BoardVO dvo) 호출 ");
+		return bDao.deleteBoard(dvo);
+	}
 	
 	
 	
