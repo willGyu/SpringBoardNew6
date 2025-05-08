@@ -3,6 +3,7 @@ package com.itwillbs.persistence;
 import java.util.List;
 
 import com.itwillbs.domain.BoardVO;
+import com.itwillbs.domain.Criteria;
 
 /**
  *	 DB의 정보를 처리하는 객체
@@ -32,8 +33,13 @@ public interface BoardDAO {
 	public Integer deleteBoard(BoardVO dvo) throws Exception;
 	
 	
+	// 게시판 목록 조회(+페이징처리)
+	public List<BoardVO> listPage(int page) throws Exception;
+	public List<BoardVO> listPage(Criteria cri) throws Exception;
 	
 	
+	// 게시판 글 총 개수 
+	public int getTotalCount() throws Exception;
 	
 	
 	

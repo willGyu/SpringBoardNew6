@@ -6,6 +6,8 @@
 
 <form role="form" action="" method="get">
 	<input type="hidden" name="bno"  value="${boardVO.bno }">
+	<input type="hidden" name="page" value="${param.page }">
+	
 </form>
 
 <div class="box box-primary">
@@ -69,7 +71,8 @@
 		// 목록으로 이동 버튼 클릭시 페이지 이동
 		$(".btn-primary").click(function(){
 			//alert("버튼 클릭!");
-			location.href="/board/listAll";			
+			//location.href="/board/listAll";			
+			location.href="/board/listPage?page=${param.page}";			
 		});
 		
 		// 폼태그 정보가져오기
