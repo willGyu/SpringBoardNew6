@@ -38,6 +38,9 @@ public interface BoardDAO {
 	public List<BoardVO> listPage(Criteria cri) throws Exception;
 	
 	
+	// 게시판 글 총 개수 
+	public int getTotalCount() throws Exception;
+	
 	
 	
 }

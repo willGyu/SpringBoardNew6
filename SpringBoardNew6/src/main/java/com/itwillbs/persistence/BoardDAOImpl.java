@@ -116,16 +116,14 @@ public class BoardDAOImpl implements BoardDAO{
 		logger.info(" listPage(Criteria cri)  실행 ");
 		
 		// 1 page -> 0,10  2page -> 10,10  3page -> 20,10 
-//		if(cri.getPage() <= 0) {
-//			cri.setPage(1);
-//		}
-//		cri.setPage( (cri.getPage() - 1) * 10 );
-//		if(page <= 0) {
-//			page=1;
-//		}
-//		page = (page - 1) * 10;
 		
 		return sqlSession.selectList(NAMESPACE + "listCri",cri);
+	}
+
+	@Override
+	public int getTotalCount() throws Exception {
+		logger.info(" getTotalCount() 호출 ");
+		return sqlSession.selectOne(NAMESPACE + "getTotalCount");
 	}
 	
 	
