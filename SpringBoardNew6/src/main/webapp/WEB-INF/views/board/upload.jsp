@@ -61,8 +61,6 @@
 			$(".fileDiv").append(" <input type='file' name='file"+cnt+"' class='form-control' id='exampleInputEmail1' >");
 			cnt++;
 		});
-		
-		
 	});
 </script>
 
