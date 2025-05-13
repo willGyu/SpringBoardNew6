@@ -26,8 +26,12 @@
 		파일명 : <a href="./download?fileName=${fileName }">${fileName }</a> <br>
 		<hr>
 		<img src="./download?fileName=${fileName }" width="100">
-		
+		<hr><hr>
+		<h2> 썸네일 </h2>		
+		<img src="./thumbnail?fileName=${fileName }">
 	</c:forEach>
+	
+	
 	
 	
 	

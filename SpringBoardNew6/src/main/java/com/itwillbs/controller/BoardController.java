@@ -34,6 +34,8 @@ import com.itwillbs.domain.Criteria;
 import com.itwillbs.domain.PageVO;
 import com.itwillbs.service.BoardService;
 
+import net.coobird.thumbnailator.Thumbnails;
+
 @Controller
 @RequestMapping(value = "/board/*")
 public class BoardController {
@@ -373,8 +375,22 @@ public class BoardController {
 		
 		// 다운로드할 파일 생성
 		File file = new File(downFile);
-		
 		String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+		
+		/*********************************************************/		
+		// 파일 썸네일만들기
+		//  ex) 파일테스트.png
+		int lastIndex = encodedFileName.lastIndexOf(".");
+		String thumbFileName = encodedFileName.substring(0,lastIndex);
+		
+		File thumbNail = new File(request.getRealPath(FAKE_PATH)+"\\"+"thumbnail"+"\\"+thumbFileName+".png");
+		if(file.exists()) {
+			thumbNail.getParentFile().mkdirs();
+			Thumbnails.of(file).size(50, 50).outputFormat("png").toFile(thumbNail);
+			logger.info(" 썸네일 생성 완료! ");
+		}
+		
+		/*********************************************************/		
 		
 		// 다운로드 정보를 출력할 객체
 		OutputStream out = response.getOutputStream();
@@ -417,6 +433,42 @@ public class BoardController {
 		
 	}
 	
+	// 파일 다운로드 동작
+	@RequestMapping(value = "/thumbnail",method = RequestMethod.GET)
+	public void thumbNailDownloadGET(@RequestParam("fileName") String fileName,
+			                    HttpServletRequest request,
+			                    HttpServletResponse response
+			                    ) throws Exception{
+		logger.info(" thumbNailDownloadGET() ");
+		
+		// 다운로드 하려는 폴더 == 업로드한 폴더
+		final String FAKE_PATH = "/upload";
+		String downFile = request.getRealPath(FAKE_PATH) + "\\" + fileName ;
+		
+		// 다운로드할 파일 생성
+		File file = new File(downFile);
+		String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+		
+		// 다운로드 정보를 출력할 객체
+		OutputStream out = response.getOutputStream(); 
+		
+		/*********************************************************/		
+		// 파일 썸네일만들기
+		//  ex) 파일테스트.png
+		int lastIndex = encodedFileName.lastIndexOf(".");
+		String thumbFileName = encodedFileName.substring(0,lastIndex);
+		
+		File thumbNail = new File(request.getRealPath(FAKE_PATH)+"\\"+"thumbnail"+"\\"+thumbFileName+".png");
+		if(file.exists()) {
+			//thumbNail.getParentFile().mkdirs();
+			Thumbnails.of(file).size(50, 50).outputFormat("png").toOutputStream(out);
+			logger.info(" 썸네일 생성 완료! ");
+		}
+		
+		/*********************************************************/		
+		
+		out.close();
+	}
 	
 	
 	
