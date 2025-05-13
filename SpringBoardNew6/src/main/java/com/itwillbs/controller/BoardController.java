@@ -1,8 +1,20 @@
 package com.itwillbs.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -13,12 +25,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.itwillbs.domain.BoardVO;
 import com.itwillbs.domain.Criteria;
 import com.itwillbs.domain.PageVO;
 import com.itwillbs.service.BoardService;
+
+import net.coobird.thumbnailator.Thumbnails;
 
 @Controller
 @RequestMapping(value = "/board/*")
@@ -237,6 +253,221 @@ public class BoardController {
 		rttr.addFlashAttribute("result", "deleteOK");
 		//return "redirect:/board/listAll";
 		return "redirect:/board/listPage?page="+cri.getPage();
+	}
+	
+	
+	// 파일업로드 뷰페이지 GET
+	@RequestMapping(value = "/upload",method = RequestMethod.GET)
+	public void fileUploadGET() throws Exception{
+		logger.info(" fileUploadGET() 실행 ");
+	}
+	
+	// 파일업로드 처리 POST
+	@RequestMapping(value = "/upload",method = RequestMethod.POST)
+	public String fileUploadPOST(MultipartHttpServletRequest multiRequest,
+			                     Model model) throws Exception{
+		logger.info(" fileUploadPOST() ");
+		
+		//  파라메터 데이터
+		//logger.info(" title : "+multiRequest.getParameter("title"));
+		Map map = new HashMap();
+		
+		Enumeration enu = multiRequest.getParameterNames();
+		while(enu.hasMoreElements()) { // 데이터가 있을때 실행
+			String name = (String) enu.nextElement();
+			logger.info(" name : "+name); // 파라메터 이름 출력
+			String value = multiRequest.getParameter(name);
+			logger.info(" value : "+value); // 파라메터 값 출력
+			
+			map.put(name, value);
+		}
+		
+		logger.info(" 폼태그로 전달된 파라메터정보 저장완료! (파일정보를 제외)");
+		logger.info(" map : "+map);
+		
+		//  파일업로드 데이터
+		List fileList = fileProcess(multiRequest);
+		
+		// 기존의 파라메터 정보를 저장한 map에 
+		// 파일의 이름정보도 추가로 저장
+		
+		map.put("fileList", fileList);
+		logger.info(" map : "+map);
+		
+		model.addAttribute("map", map);
+		
+		return "/board/fileUploadResult";
+	}
+	
+	
+	// 파일업로드를 처리하는 메서드
+	private List fileProcess(MultipartHttpServletRequest multiRequest) {
+		
+		final String FAKE_PATH = "/upload";
+		
+		// 전송된 파일정보(이름)를 저장
+		List<String> fileList = new ArrayList<String>();
+		
+		// 파일정보(파라메터) 받아오기
+		Iterator<String> fileNames =  multiRequest.getFileNames();
+		while(fileNames.hasNext()) {//데이터 있을때 처리
+			
+			String fileName = fileNames.next();
+			// => 폼태그의 input -file 이름 정보
+			MultipartFile mFile = multiRequest.getFile(fileName);
+			// => 임시로 전달받은 파일정보를 저장
+			
+			// 파일명 구하기
+			String oFileName = mFile.getOriginalFilename();
+			// 파일의 이름을 리스트에 저장
+			fileList.add(oFileName);
+			
+			// 파일정보 업로드
+			// getRealPath()를 통해서 서버의 주소(위치)를 찾는 작업
+			//   ~~~~/upload\파일명
+			// D:\Shared\workspace_sts\.metadata\.plugins
+			//   \org.eclipse.wst.server.core\tmp0\wtpwebapps
+			//   \SpringBoardNew6
+//			File file = new File(multiRequest.getRealPath(FAKE_PATH)+"\\"+fileName);
+			File file 
+			= new File(multiRequest.getRealPath(FAKE_PATH)+"\\"+oFileName);
+			
+			if(mFile.getSize() != 0) { // 파일의 업로드 정보가 있다.
+				if(! file.exists()) {
+					// file 객체 경로에 정보가 없을경우
+					if(file.getParentFile().mkdirs()) {
+						try {
+							file.createNewFile();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}// mkdirs
+				}//exists
+				try {
+					// 해당 경로의 정보가 있을때
+					// 임시 파일의 정보를 해당 파일로 이동
+					mFile.transferTo(file);	
+					System.out.println(" 파일업로드 성공! ");
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}//size
+			
+		} //while
+		return fileList;
+	}
+	
+	
+	// 파일 다운로드 동작
+	@RequestMapping(value = "/download",method = RequestMethod.GET)
+	public void fileDownloadGET(@RequestParam("fileName") String fileName,
+			                    HttpServletRequest request,
+			                    HttpServletResponse response
+			                    ) throws Exception{
+		logger.info(" fileDownloadGET() ");
+		
+		// 다운로드 하려는 폴더 == 업로드한 폴더
+		final String FAKE_PATH = "/upload";
+		String downFile = request.getRealPath(FAKE_PATH) + "\\" + fileName ;
+		
+		// 다운로드할 파일 생성
+		File file = new File(downFile);
+		String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+		
+		/*********************************************************/		
+		// 파일 썸네일만들기
+		//  ex) 파일테스트.png
+		int lastIndex = encodedFileName.lastIndexOf(".");
+		String thumbFileName = encodedFileName.substring(0,lastIndex);
+		
+		File thumbNail = new File(request.getRealPath(FAKE_PATH)+"\\"+"thumbnail"+"\\"+thumbFileName+".png");
+		if(file.exists()) {
+			thumbNail.getParentFile().mkdirs();
+			Thumbnails.of(file).size(50, 50).outputFormat("png").toFile(thumbNail);
+			logger.info(" 썸네일 생성 완료! ");
+		}
+		
+		/*********************************************************/		
+		
+		// 다운로드 정보를 출력할 객체
+		OutputStream out = response.getOutputStream();
+		response.setHeader("Cache-Control", "no-cache");
+		//response.addHeader("Content-disposition", "attachment; fileName="+fileName);
+		response.addHeader("Content-disposition", "attachment; fileName="+encodedFileName);
+		//=> 모든 파일들이 다운로드 형태로 처리 
+		
+		// 파일정보를 읽어오기
+		FileInputStream fis = new FileInputStream(file);
+		
+		byte[] buffer = new byte[1024 * 8]; // 8KB 
+		
+		while(true) {
+			int data = fis.read(buffer);
+			if(data == -1) break; // -1 (EOF, 파일의 끝)
+			
+			//파일 출력(다운로드)
+			out.write(buffer,0,data);
+		}
+		
+		fis.close();
+		out.close();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	// 파일 다운로드 동작
+	@RequestMapping(value = "/thumbnail",method = RequestMethod.GET)
+	public void thumbNailDownloadGET(@RequestParam("fileName") String fileName,
+			                    HttpServletRequest request,
+			                    HttpServletResponse response
+			                    ) throws Exception{
+		logger.info(" thumbNailDownloadGET() ");
+		
+		// 다운로드 하려는 폴더 == 업로드한 폴더
+		final String FAKE_PATH = "/upload";
+		String downFile = request.getRealPath(FAKE_PATH) + "\\" + fileName ;
+		
+		// 다운로드할 파일 생성
+		File file = new File(downFile);
+		String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+		
+		// 다운로드 정보를 출력할 객체
+		OutputStream out = response.getOutputStream(); 
+		
+		/*********************************************************/		
+		// 파일 썸네일만들기
+		//  ex) 파일테스트.png
+		int lastIndex = encodedFileName.lastIndexOf(".");
+		String thumbFileName = encodedFileName.substring(0,lastIndex);
+		
+		File thumbNail = new File(request.getRealPath(FAKE_PATH)+"\\"+"thumbnail"+"\\"+thumbFileName+".png");
+		if(file.exists()) {
+			//thumbNail.getParentFile().mkdirs();
+			Thumbnails.of(file).size(50, 50).outputFormat("png").toOutputStream(out);
+			logger.info(" 썸네일 생성 완료! ");
+		}
+		
+		/*********************************************************/		
+		
+		out.close();
 	}
 	
 	
